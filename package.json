@@ -4,7 +4,10 @@
   "description": "Simple carousel component for React",
   "author": "Kiril Krsteski",
   "homepage": "https://github.com/kkx64/react-simple-carousel",
-  "repository": "github:kkx64/react-simple-carousel",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kkx64/react-simple-carousel.git"
+  },
   "license": "MIT",
   "keywords": [
     "vite",
