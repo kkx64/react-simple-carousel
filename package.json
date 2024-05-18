@@ -30,7 +30,7 @@
     "format:styles": "stylelint ./**/*.{css,scss} --fix",
     "format": "prettier ./src --write",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "npm run build && storybook build"
   },
   "dependencies": {
     "classnames": "^2.5.1",
