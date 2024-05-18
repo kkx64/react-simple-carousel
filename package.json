@@ -1,10 +1,10 @@
 {
-  "name": "vite-typescript-npm-package",
+  "name": "react-simple-carousel",
   "version": "1.0.0",
-  "description": "Vite TypeScript library npm package template",
-  "author": "Jason Sturges <jason@jsonsturges.com> (https://jasonsturges.com)",
-  "homepage": "https://github.com/jasonsturges/vite-typescript-npm-package",
-  "repository": "github:jasonsturges/vite-typescript-npm-package",
+  "description": "Simple carousel component for React",
+  "author": "Kiril Krsteski",
+  "homepage": "https://github.com/kkx64/react-simple-carousel",
+  "repository": "github:kkx64/react-simple-carousel",
   "license": "ISC",
   "keywords": [
     "vite",
@@ -27,13 +27,29 @@
     "lint:scripts": "eslint ./src --ext .ts",
     "lint:styles": "stylelint ./**/*.{css,scss}",
     "format:scripts": "prettier ./src --write",
-    "format:styles": "stylelint ./**/*.{css,scss} --fix"
+    "format:styles": "stylelint ./**/*.{css,scss} --fix",
+    "format": "prettier ./src --write",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
+    "classnames": "^2.5.1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-use-measure": "^2.1.1",
+    "sass": "^1.77.2"
   },
   "devDependencies": {
+    "@chromatic-com/storybook": "^1.4.0",
+    "@storybook/addon-essentials": "^8.1.1",
+    "@storybook/addon-interactions": "^8.1.1",
+    "@storybook/addon-links": "^8.1.1",
+    "@storybook/addon-onboarding": "^8.1.1",
+    "@storybook/blocks": "^8.1.1",
+    "@storybook/builder-vite": "^8.1.1",
+    "@storybook/react": "^8.1.1",
+    "@storybook/react-vite": "^8.1.1",
+    "@storybook/test": "^8.1.1",
     "@types/node": "^20.11.24",
     "@types/react": "^18.2.47",
     "@types/react-dom": "^18.2.18",
@@ -44,7 +60,9 @@
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-storybook": "^0.8.0",
     "prettier": "^3.2.5",
+    "storybook": "^8.1.1",
     "stylelint": "^16.2.1",
     "stylelint-config-recommended": "^14.0.0",
     "stylelint-config-sass-guidelines": "^11.0.0",
@@ -52,5 +70,10 @@
     "typescript": "^5.3.3",
     "vite": "^5.1.4",
     "vite-plugin-dts": "^3.7.3"
+  },
+  "eslintConfig": {
+    "extends": [
+      "plugin:storybook/recommended"
+    ]
   }
 }
