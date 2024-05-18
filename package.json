@@ -1,11 +1,11 @@
 {
-  "name": "react-simple-carousel",
+  "name": "@kkx64/react-simple-carousel",
   "version": "1.0.0",
   "description": "Simple carousel component for React",
   "author": "Kiril Krsteski",
   "homepage": "https://github.com/kkx64/react-simple-carousel",
   "repository": "github:kkx64/react-simple-carousel",
-  "license": "ISC",
+  "license": "MIT",
   "keywords": [
     "vite",
     "typescript",

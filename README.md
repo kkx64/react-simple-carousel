@@ -3,6 +3,8 @@
 A simple, lightweight, performant & easy to modify carousel component for React. Built for simplicity and ease of use.  
 Works on desktop with arrows and dragging on mobile.
 
+See the [Storybook](https://kkx64.github.io/react-simple-carousel/?path=/story/carousel--basic-carousel) for demos.
+
 ## Installation
 
 You can install the package using your package manager of choice:
