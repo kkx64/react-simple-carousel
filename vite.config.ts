@@ -5,22 +5,26 @@ import dts from "vite-plugin-dts";
 
 export default defineConfig({
   base: "./",
-  plugins: [dts({ rollupTypes: true }), react()],
+  plugins: [dts({ rollupTypes: true, exclude: ["src/stories/**/*"] }), react()],
   build: {
     sourcemap: false,
+    minify: true,
     lib: {
       entry: path.resolve(__dirname, "src/index.ts"),
       name: "mylib",
-      formats: ["es", "cjs", "umd", "iife"],
+      formats: ["es", "cjs"],
       fileName: (format) => `index.${format}.js`,
     },
     rollupOptions: {
-      external: ["react", "react-dom"],
+      external: ["react", "react-dom", "react-dom/client", "react/jsx-runtime"],
       output: {
         globals: {
           react: "React",
           "react-dom": "ReactDOM",
         },
+      },
+      treeshake: {
+        moduleSideEffects: false,
       },
     },
   },

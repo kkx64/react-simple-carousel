@@ -1,6 +1,6 @@
 {
   "name": "@kkx64/react-simple-carousel",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Simple carousel component for React",
   "author": "Kiril Krsteski",
   "homepage": "https://github.com/kkx64/react-simple-carousel",
@@ -14,7 +14,12 @@
     "carousel",
     "slider",
     "simple",
-    "fast"
+    "fast",
+    "swipe",
+    "mobile",
+    "touch",
+    "gallery",
+    "image-gallery"
   ],
   "main": "dist/index.cjs.js",
   "module": "dist/index.es.js",
@@ -26,7 +31,7 @@
   "scripts": {
     "dev": "tsc && vite build --watch",
     "start": "vite --host --open",
-    "build": "tsc && vite build",
+    "build": "tsc && NODE_ENV=production vite build",
     "build:types": "dts-bundle-generator --config ./dts-bundle-generator.config.ts",
     "lint:scripts": "eslint ./src --ext .ts",
     "lint:styles": "stylelint ./**/*.scss",
@@ -37,9 +42,11 @@
   },
   "dependencies": {
     "classnames": "^2.5.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "react-use-measure": "^2.1.1"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^1.4.0",
