@@ -1,13 +1,13 @@
-import dts from "vite-plugin-dts";
-import path from "path";
 import react from "@vitejs/plugin-react";
+import path from "path";
 import { defineConfig, UserConfig } from "vite";
+import dts from "vite-plugin-dts";
 
 export default defineConfig({
   base: "./",
   plugins: [dts({ rollupTypes: true }), react()],
   build: {
-    sourcemap: true,
+    sourcemap: false,
     lib: {
       entry: path.resolve(__dirname, "src/index.ts"),
       name: "mylib",

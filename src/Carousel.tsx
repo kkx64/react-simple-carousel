@@ -4,6 +4,7 @@ import {
   Children,
   forwardRef,
   PropsWithChildren,
+  ReactNode,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -16,7 +17,7 @@ import clsx from "classnames";
 import useMeasure from "react-use-measure";
 
 import CarouselArrows from "./CarouselArrows";
-import CarouselDots from "./CarouselDots";
+import CarouselDots, { DotRenderFnProps } from "./CarouselDots";
 
 export interface CarouselProps extends PropsWithChildren {
   shownSlides?: number;
@@ -25,6 +26,9 @@ export interface CarouselProps extends PropsWithChildren {
   trackClassName?: string;
   slideClassName?: string;
   disableTranslate?: boolean;
+  dotsGradient?: boolean;
+  dotsFixed?: boolean;
+  dotRender?: (props: DotRenderFnProps) => ReactNode;
   customDots?:
     | ((props: {
         dots: number;
@@ -52,6 +56,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       customDots,
       customArrows,
       onSlideChange,
+      dotRender,
       children,
       containerClassName,
       trackClassName,
@@ -59,6 +64,8 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       disableTranslate,
       transitionDuration = 0.3,
       shownSlides = 1,
+      dotsFixed,
+      dotsGradient,
     }: CarouselProps,
     ref,
   ) => {
@@ -195,6 +202,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
         >
           {Children.map(children, (child, i) => (
             <div
+              key={`slide-${i}`}
               style={{
                 width: containerBounds.width / shownSlides,
                 height: containerBounds.height,
@@ -229,6 +237,9 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
             dots={slides}
             activeDot={currentSlide}
             onDotClick={onDotClick}
+            fixed={dotsFixed}
+            gradient={dotsGradient}
+            dotRender={dotRender}
           />
         )}
 

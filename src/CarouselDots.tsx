@@ -5,6 +5,11 @@ import { memo, useCallback, useMemo } from "react";
 import clsx from "classnames";
 import useMeasure from "react-use-measure";
 
+export interface DotRenderFnProps {
+  dot: number;
+  isActive: boolean;
+  ref: (element: HTMLElement | null) => void;
+}
 export interface CarouselDotsProps {
   dots: number;
   activeDot: number;
@@ -12,7 +17,10 @@ export interface CarouselDotsProps {
   wrapperClassName?: string;
   trackClassName?: string;
   dotClassName?: string;
+  gradient?: boolean;
+  fixed?: boolean;
   onDotClick?: (dot: number) => void;
+  dotRender?: ({ dot, isActive }: DotRenderFnProps) => React.ReactNode;
 }
 
 const CarouselDots = ({
@@ -22,7 +30,10 @@ const CarouselDots = ({
   trackClassName,
   wrapperClassName,
   dotClassName,
+  gradient,
+  fixed,
   onDotClick: onDotClickProp,
+  dotRender,
 }: CarouselDotsProps) => {
   const [containerRef, containerBounds] = useMeasure();
   const [trackRef, trackBounds] = useMeasure();
@@ -53,40 +64,54 @@ const CarouselDots = ({
 
   return (
     <div
+      style={{
+        width: fixed
+          ? "fit-content"
+          : `min(${dotBounds.width * 3 + 36}px, 80%)`,
+      }}
       className={clsx({ CarouselDots: !wrapperClassName }, wrapperClassName)}
     >
       <div
         ref={containerRef}
         className={clsx(
-          { CarouselDots__container: !containerClassName },
+          {
+            CarouselDots__container: !containerClassName,
+            "CarouselDots__container--no-gradient":
+              gradient === false || fixed === true,
+          },
           containerClassName,
         )}
       >
         <div
           ref={trackRef}
           style={{
-            transform: `translateX(${translateX}px)`,
+            ...(!fixed && { transform: `translateX(${translateX}px)` }),
           }}
           className={clsx(
             { CarouselDots__track: !trackClassName },
             trackClassName,
           )}
         >
-          {dotsArray.map((dot) => (
-            <div
-              onClick={() => onDotClick?.(dot)}
-              ref={dotRef}
-              key={dot}
-              className={clsx({
-                CarouselDots__dot: !dotClassName,
-                "CarouselDots__dot--active": dot === activeDot && !dotClassName,
-                ...(dotClassName && {
-                  [dotClassName]: true,
-                  [`${dotClassName}--active`]: dot === activeDot,
-                }),
-              })}
-            />
-          ))}
+          {dotsArray.map((dot) =>
+            dotRender ? (
+              dotRender({ dot, isActive: dot === activeDot, ref: dotRef })
+            ) : (
+              <div
+                onClick={() => onDotClick?.(dot)}
+                ref={dotRef}
+                key={`dot-${dot}`}
+                className={clsx({
+                  CarouselDots__dot: !dotClassName,
+                  "CarouselDots__dot--active":
+                    dot === activeDot && !dotClassName,
+                  ...(dotClassName && {
+                    [dotClassName]: true,
+                    [`${dotClassName}--active`]: dot === activeDot,
+                  }),
+                })}
+              />
+            ),
+          )}
         </div>
       </div>
     </div>

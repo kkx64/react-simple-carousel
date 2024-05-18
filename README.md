@@ -84,9 +84,18 @@ The library exports three components: `Carousel`, `CarouselDots` and `CarouselAr
 - **disableTranslate**: `boolean`  
   Boolean indicating whether to disable CSS translation for slide animations.
 
+- **dotsGradient**: `boolean`  
+  Whether to fade out dots at the edges. Default is on - overrides to off when `dotsFixed = true`.
+
+- **dotsFixed**: `boolean`  
+  Set to `true` to disable dot scrolling and switch to fixed dot layout. Also disables dot fade gradient.
+
+- **dotRender**: `({dot: number, isActive: boolean, ref: (element: HTMLElement) => void }) => ReactNode`
+  Custom dot rendering function, to render special dots without completely removing the scrolling dots feature.
+
 - **customDots**: `((props: { dots: number; activeDot: number; onDotClick?: (index: number) => void; }) => JSX.Element) | null`  
-  A function that renders custom navigation dots.  
-  You can use the existing `CarouselDots` component here, if you want to just override simple styles in the default layout.  
+  A function that renders custom navigation dots, in place of the CarouselDots component.  
+  You can still use the existing `CarouselDots` component here, if you want to just override simple styles in the default layout.  
   If you don't want to render any dots, pass `null` as a prop.
 
 - **customArrows**: `((props: { onNextClick: () => void; onPrevClick: () => void; }) => JSX.Element) | null`  
@@ -111,6 +120,9 @@ The library exports three components: `Carousel`, `CarouselDots` and `CarouselAr
 
 - **onDotClick**: `(dot: number) => void`  
   A callback function invoked when a dot is clicked. Receives the index of the clicked dot as an argument.
+
+- **dotRender**: `({dot: number, isActive: boolean, ref: (element: HTMLElement) => void }) => ReactNode`
+  Custom dot rendering function, to render special dots without completely removing the scrolling dots feature.
 
 - **dots**: `number`  
   The total number of dots to be rendered.
@@ -308,29 +320,6 @@ import coffee2 from "./coffee2.jpg";
 
 const images = [building, flower, coffee, coffee2];
 
-const CustomDotComponent = ({
-  activeDot,
-  onDotClick,
-}: {
-  dots: number;
-  activeDot: number;
-  onDotClick?: (index: number) => void;
-}) => (
-  <div className="CustomDots">
-    {images.map((image, index) => (
-      <div
-        key={index}
-        className={clsx("CustomDots__dot", {
-          "CustomDots__dot--active": activeDot === index,
-        })}
-        onClick={() => onDotClick?.(index)}
-      >
-        <img src={image} />
-      </div>
-    ))}
-  </div>
-);
-
 const CustomDotsCarousel = () => {
   return (
     <div style={{ width: "100%", height: 400 }}>
@@ -338,7 +327,24 @@ const CustomDotsCarousel = () => {
         dotClassName="CustomDot"
         shownSlides={1}
         transitionDuration={0.5}
-        customDots={(props) => <CustomDotComponent {...props} />}
+        customDots={(props) => (
+          <CarouselDots
+            wrapperClassName="CustomDots"
+            dotRender={({ dot, isActive, ref }) => (
+              <div
+                ref={ref}
+                key={dot}
+                className={clsx("CustomDots__dot", {
+                  "CustomDots__dot--active": isActive,
+                })}
+                onClick={() => props.onDotClick?.(dot)}
+              >
+                <img src={images[dot]} />
+              </div>
+            )}
+            {...props}
+          />
+        )}
       >
         <img src={building} alt="Building" />
         <img src={flower} alt="Flower" />

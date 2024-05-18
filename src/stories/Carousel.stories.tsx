@@ -31,6 +31,16 @@ const meta: Meta<typeof Carousel> = {
       description: "Duration of the slide transition",
       control: { type: "number" },
     },
+    dotsFixed: {
+      type: "boolean",
+      description: "Whether the dots should be fixed",
+      control: { type: "boolean" },
+    },
+    dotsGradient: {
+      type: "boolean",
+      description: "Whether the dots should have a gradient",
+      control: { type: "boolean" },
+    },
   },
 };
 
@@ -80,13 +90,6 @@ export const CustomizedDots: Story = {
         <img src={coffee2} />
       </div>,
     ],
-    customDots: (props) => (
-      <CarouselDots
-        wrapperClassName="CustomizedDots"
-        dotClassName="CustomizedDots__dot"
-        {...props}
-      />
-    ),
   },
   decorators: [
     (Story) => (
@@ -95,32 +98,23 @@ export const CustomizedDots: Story = {
       </div>
     ),
   ],
+  render: (componentProps) => (
+    <Carousel
+      customDots={(props) => (
+        <CarouselDots
+          wrapperClassName="CustomizedDots"
+          dotClassName="CustomizedDots__dot"
+          fixed={componentProps.dotsFixed}
+          gradient={componentProps.dotsGradient}
+          {...props}
+        />
+      )}
+      {...componentProps}
+    />
+  ),
 };
 
 const images = [building, flower, coffee, coffee2];
-
-const CustomDotComponent = ({
-  activeDot,
-  onDotClick,
-}: {
-  dots: number;
-  activeDot: number;
-  onDotClick?: (index: number) => void;
-}) => (
-  <div className="CustomDots">
-    {images.map((image, index) => (
-      <div
-        key={index}
-        className={clsx("CustomDots__dot", {
-          "CustomDots__dot--active": activeDot === index,
-        })}
-        onClick={() => onDotClick?.(index)}
-      >
-        <img src={image} />
-      </div>
-    ))}
-  </div>
-);
 
 export const CustomDots: Story = {
   args: {
@@ -138,7 +132,6 @@ export const CustomDots: Story = {
         <img src={coffee2} />
       </div>,
     ],
-    customDots: (props) => <CustomDotComponent {...props} />,
   },
   decorators: [
     (Story) => (
@@ -147,6 +140,31 @@ export const CustomDots: Story = {
       </div>
     ),
   ],
+  render: (componentProps) => (
+    <Carousel
+      customDots={(props) => (
+        <CarouselDots
+          wrapperClassName="CustomDots"
+          fixed={componentProps.dotsFixed}
+          gradient={componentProps.dotsGradient}
+          dotRender={({ dot, isActive, ref }) => (
+            <div
+              ref={ref}
+              key={dot}
+              className={clsx("CustomDots__dot", {
+                "CustomDots__dot--active": isActive,
+              })}
+              onClick={() => props.onDotClick?.(dot)}
+            >
+              <img src={images[dot]} />
+            </div>
+          )}
+          {...props}
+        />
+      )}
+      {...componentProps}
+    />
+  ),
 };
 
 export const ActiveSlideStyle: Story = {
@@ -259,7 +277,7 @@ const StylizedCarouselComponent = (props: CarouselProps) => {
           }
           return (
             <div
-              key={index}
+              key={`stylized-image-${index}`}
               className="CarouselStory__slide StylizedCarousel__slide"
               style={{
                 rotate: `${rot}deg`,
