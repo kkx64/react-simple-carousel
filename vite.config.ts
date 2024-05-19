@@ -2,10 +2,15 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig, UserConfig } from "vite";
 import dts from "vite-plugin-dts";
+import { libInjectCss } from "vite-plugin-lib-inject-css";
 
 export default defineConfig({
   base: "./",
-  plugins: [dts({ rollupTypes: true, exclude: ["src/stories/**/*"] }), react()],
+  plugins: [
+    react(),
+    libInjectCss(),
+    dts({ rollupTypes: true, exclude: ["src/stories/**/*"] }),
+  ],
   build: {
     sourcemap: false,
     minify: true,

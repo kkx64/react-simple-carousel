@@ -48,6 +48,7 @@ export interface CarouselProps extends PropsWithChildren {
 export interface CarouselRef {
   nextSlide: () => void;
   prevSlide: () => void;
+  setSlide: (index: number) => void;
 }
 
 const Carousel = forwardRef<CarouselRef, CarouselProps>(
@@ -172,9 +173,14 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       onSlideChange?.(currentSlide);
     }, [currentSlide]);
 
+    const handleSetSlide = useCallback((index: number) => {
+      setCurrentSlide((index + slides) % slides);
+    }, []);
+
     useImperativeHandle(ref, () => ({
       nextSlide: onNextClick,
       prevSlide: onPrevClick,
+      setSlide: handleSetSlide,
     }));
 
     const trackStyle = useMemo(() => {
