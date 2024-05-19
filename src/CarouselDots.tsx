@@ -19,6 +19,7 @@ export interface CarouselDotsProps {
   dotClassName?: string;
   gradient?: boolean;
   fixed?: boolean;
+  transitionDuration?: number;
   onDotClick?: (dot: number) => void;
   dotRender?: ({ dot, isActive }: DotRenderFnProps) => React.ReactNode;
 }
@@ -32,12 +33,13 @@ const CarouselDots = ({
   dotClassName,
   gradient,
   fixed,
+  transitionDuration,
   onDotClick: onDotClickProp,
   dotRender,
 }: CarouselDotsProps) => {
-  const [containerRef, containerBounds] = useMeasure();
-  const [trackRef, trackBounds] = useMeasure();
-  const [dotRef, dotBounds] = useMeasure();
+  const [containerRef, containerBounds] = useMeasure({ debounce: 100 });
+  const [trackRef, trackBounds] = useMeasure({ debounce: 100 });
+  const [dotRef, dotBounds] = useMeasure({ debounce: 100 });
 
   const dotsArray = useMemo(
     () => Array.from({ length: dots }, (_, index) => index),
@@ -49,13 +51,7 @@ const CarouselDots = ({
       containerBounds.width / 2 -
       trackBounds.width / dots / 2 -
       (trackBounds.width / dots) * activeDot,
-    [
-      containerBounds.width,
-      dotBounds.width,
-      activeDot,
-      trackBounds.width,
-      dots,
-    ],
+    [containerBounds.width, activeDot, trackBounds.width, dots],
   );
 
   const onDotClick = useCallback((dot: number) => {
@@ -86,6 +82,9 @@ const CarouselDots = ({
           ref={trackRef}
           style={{
             ...(!fixed && { transform: `translateX(${translateX}px)` }),
+            transitionDuration: transitionDuration
+              ? `${transitionDuration}s`
+              : undefined,
           }}
           className={clsx(
             { CarouselDots__track: !trackClassName },

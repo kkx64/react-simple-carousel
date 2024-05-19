@@ -26,8 +26,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 3rem;
+    height: 3rem;
 
     background-color: rgba(0, 0, 0, 0.3);
     border-radius: 50%;
@@ -43,8 +43,8 @@
 
     svg {
       fill: white;
-      width: 24px;
-      height: 24px;
+      width: 1.5rem;
+      height: 1.5rem;
     }
 
     &:hover {

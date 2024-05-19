@@ -39,7 +39,7 @@ export default MyCarousel;
 
 ## Examples
 
-For examples see the [CodeSandbox](https://codesandbox.io/p/sandbox/kkx64-react-simple-carousel-examples-z6ccm7)
+For examples see the [CodeSandbox](https://codesandbox.io/p/sandbox/kkx64-react-simple-carousel-examples-z6ccm7).
 
 ## Components
 
@@ -136,6 +136,9 @@ The library exports three components: `Carousel`, `CarouselDots` and `CarouselAr
 
 - **activeDot**: `number`  
   The index of the active dot.
+
+- **transitionDuration**: `number`
+  Transition duration for the sliding dots (in seconds). Passed down from `Carousel` if using default dots.
 
 - **containerClassName**: `string`  
   **Replacement** CSS class names for the container of the dots.

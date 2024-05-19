@@ -9,7 +9,6 @@ import {
   useEffect,
   useImperativeHandle,
   useMemo,
-  useRef,
   useState,
 } from "react";
 
@@ -18,6 +17,7 @@ import useMeasure from "react-use-measure";
 
 import CarouselArrows from "./CarouselArrows";
 import CarouselDots, { DotRenderFnProps } from "./CarouselDots";
+import { clamp, logScale } from "./utils/mathUtils";
 
 export interface CarouselProps extends PropsWithChildren {
   shownSlides?: number;
@@ -70,13 +70,31 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
     }: CarouselProps,
     ref,
   ) => {
-    const [containerRef, containerBounds] = useMeasure();
+    const [containerRef, containerBounds] = useMeasure({ debounce: 100 });
+    const [trackRef, trackBounds] = useMeasure({ debounce: 100 });
+
     const [currentSlide, setCurrentSlide] = useState(0);
+
     const [dragStartX, setDragStartX] = useState(0);
     const [dragging, setDragging] = useState(false);
-    const trackRef = useRef<HTMLDivElement>(null);
+    const [dragOffsetState, setDragOffsetState] = useState(0);
 
+    /** Total number of slides */
     const slides = useMemo(() => Children.count(children), [children]);
+
+    /** Maximum offset a slide can be dragged */
+    const maxOffsetSlide = useMemo(
+      () => trackBounds.width / slides,
+      [trackBounds.width, slides],
+    );
+
+    /** Maximum offset a slide can be dragged at the first and last slide, when trying to slide out of bounds */
+    const maxOffsetSlideEnd = useMemo(
+      () => maxOffsetSlide / 8,
+      [maxOffsetSlide],
+    );
+
+    // Slide change logic
 
     const onDotClick = useCallback((index: number) => {
       setCurrentSlide(index);
@@ -90,16 +108,21 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       setCurrentSlide((slide) => (slide + 1) % slides);
     }, [slides]);
 
-    const translateX = useMemo(() => {
-      if (slides <= shownSlides) {
-        return 0;
-      }
-      const maxTranslateX =
-        (slides - shownSlides) * (containerBounds.width / shownSlides);
-      const calculatedTranslateX =
-        currentSlide * (containerBounds.width / shownSlides);
-      return Math.min(calculatedTranslateX, maxTranslateX);
-    }, [currentSlide, containerBounds.width, shownSlides, slides]);
+    const handleSetSlide = useCallback((index: number) => {
+      setCurrentSlide((index + slides) % slides);
+    }, []);
+
+    useImperativeHandle(ref, () => ({
+      nextSlide: onNextClick,
+      prevSlide: onPrevClick,
+      setSlide: handleSetSlide,
+    }));
+
+    useEffect(() => {
+      onSlideChange?.(currentSlide);
+    }, [currentSlide]);
+
+    // Dragging logic
 
     const handleDragStart = useCallback(
       (event: React.MouseEvent | React.TouchEvent) => {
@@ -113,14 +136,22 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
 
     const handleDragMove = useCallback(
       (event: React.MouseEvent | React.TouchEvent) => {
-        if (!dragging || !trackRef.current) return;
+        if (!dragging) return;
         const clientX =
           "touches" in event ? event.touches[0].clientX : event.clientX;
         const dragOffset = clientX - dragStartX;
 
-        trackRef.current.style.transform = `translateX(${-translateX + dragOffset}px)`;
+        let scaledOffset = dragOffset;
+
+        if (currentSlide === 0 && dragOffset > 0)
+          scaledOffset = logScale(dragOffset, 0, maxOffsetSlideEnd);
+        else if (currentSlide === slides - 1 && dragOffset < 0)
+          scaledOffset = -logScale(-dragOffset, 0, maxOffsetSlideEnd);
+        else scaledOffset = clamp(dragOffset, -maxOffsetSlide, maxOffsetSlide);
+
+        setDragOffsetState(scaledOffset);
       },
-      [dragging, dragStartX, translateX, trackRef.current],
+      [dragging, dragStartX, slides, currentSlide],
     );
 
     const handleDragEnd = useCallback(
@@ -130,10 +161,6 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
         const clientX =
           "touches" in event ? event.changedTouches[0].clientX : event.clientX;
         const dragOffset = clientX - dragStartX;
-
-        // Maximum allowable translation in pixels
-        const maxTranslateX =
-          (containerBounds.width * (slides - shownSlides)) / shownSlides;
 
         // Determine the new slide index based on drag offset
         let newSlide = currentSlide;
@@ -145,18 +172,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
 
         setCurrentSlide(newSlide);
         setDragging(false);
-
-        // Snap the track back to the nearest slide
-        if (trackRef.current) {
-          const newTranslateX = Math.max(
-            0,
-            Math.min(
-              maxTranslateX,
-              (newSlide * containerBounds.width) / shownSlides,
-            ),
-          );
-          trackRef.current.style.transform = `translateX(-${newTranslateX}px)`;
-        }
+        setDragOffsetState(0);
       },
       [
         dragging,
@@ -165,33 +181,40 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
         slides,
         shownSlides,
         currentSlide,
-        trackRef.current,
       ],
     );
 
-    useEffect(() => {
-      onSlideChange?.(currentSlide);
-    }, [currentSlide]);
+    // Calculate translateX
 
-    const handleSetSlide = useCallback((index: number) => {
-      setCurrentSlide((index + slides) % slides);
-    }, []);
-
-    useImperativeHandle(ref, () => ({
-      nextSlide: onNextClick,
-      prevSlide: onPrevClick,
-      setSlide: handleSetSlide,
-    }));
+    const translateX = useMemo(() => {
+      if (slides <= shownSlides) {
+        return 0;
+      }
+      const maxTranslateX =
+        (slides - shownSlides) * (containerBounds.width / shownSlides);
+      const calculatedTranslateX =
+        currentSlide * (containerBounds.width / shownSlides);
+      return Math.min(calculatedTranslateX, maxTranslateX);
+    }, [currentSlide, containerBounds.width, shownSlides, slides]);
 
     const trackStyle = useMemo(() => {
       if (!disableTranslate) {
         return {
-          transform: `translateX(-${translateX}px)`,
-          transition: `transform ${transitionDuration}s`,
+          transform: dragging
+            ? `translateX(${-translateX + dragOffsetState}px)`
+            : `translateX(${-translateX}px)`,
+          transitionDuration: `${dragging ? 0.05 : transitionDuration}s`,
+          transitionTimingFunction: dragging ? "linear" : undefined,
         };
       }
       return undefined;
-    }, [translateX, transitionDuration, disableTranslate]);
+    }, [
+      translateX,
+      transitionDuration,
+      disableTranslate,
+      dragging,
+      dragOffsetState,
+    ]);
 
     return (
       <div
@@ -199,10 +222,10 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
         className={clsx({ Carousel: !containerClassName }, containerClassName)}
       >
         <div
-          ref={trackRef}
           onTouchStart={handleDragStart}
           onTouchMove={handleDragMove}
           onTouchEnd={handleDragEnd}
+          ref={trackRef}
           style={trackStyle}
           className={clsx({ Carousel__track: !trackClassName }, trackClassName)}
         >
@@ -246,6 +269,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
             fixed={dotsFixed}
             gradient={dotsGradient}
             dotRender={dotRender}
+            transitionDuration={transitionDuration}
           />
         )}
 
