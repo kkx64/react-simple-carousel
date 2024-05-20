@@ -236,8 +236,9 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       return undefined;
     }, [translateX, transitionDuration, disableTranslate, dragging]);
 
-    const handlePageScroll = () => {
+    const handlePageScroll = (e: Event) => {
       scrolling.current = true;
+      if (dragging) e.preventDefault();
     };
 
     const handleScrollEnd = () => {
@@ -245,7 +246,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
     };
 
     useEffect(() => {
-      window.addEventListener("scroll", handlePageScroll);
+      window.addEventListener("scroll", handlePageScroll, { passive: false });
       window.addEventListener("scrollend", handleScrollEnd);
       return () => {
         window.removeEventListener("scroll", handlePageScroll);
