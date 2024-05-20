@@ -72,7 +72,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
     ref,
   ) => {
     const trackRef = useRef<HTMLDivElement>(null);
-    const scrolling = useRef(false); // ref instead of state to prevent re-renders on scroll
+    const [scrolling, setScrolling] = useState(false);
 
     const [containerRef, containerBounds] = useMeasure({ debounce: 100 });
 
@@ -150,7 +150,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
 
     const handleDragMove = useCallback(
       (event: React.MouseEvent | React.TouchEvent) => {
-        if (!dragging || !trackRef.current || scrolling.current) return;
+        if (!dragging || !trackRef.current || scrolling) return;
 
         const clientX =
           "touches" in event ? event.touches[0].clientX : event.clientX;
@@ -172,7 +172,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
         dragging,
         dragStart.x,
         dragStart.y,
-
+        scrolling,
         translateX,
         trackRef.current,
         containerBounds.width,
@@ -237,12 +237,15 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
     }, [translateX, transitionDuration, disableTranslate, dragging]);
 
     const handlePageScroll = (e: Event) => {
-      scrolling.current = true;
-      if (dragging) e.preventDefault();
+      setScrolling(true);
+      if (dragging) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
     };
 
     const handleScrollEnd = () => {
-      scrolling.current = false;
+      setScrolling(false);
     };
 
     useEffect(() => {
@@ -252,7 +255,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
         window.removeEventListener("scroll", handlePageScroll);
         window.removeEventListener("scrollend", handleScrollEnd);
       };
-    }, []);
+    }, [handlePageScroll, handleScrollEnd]);
 
     return (
       <div ref={containerRef} className={clsx("Carousel", containerClassName)}>
