@@ -79,7 +79,7 @@ The library exports three components: `Carousel`, `CarouselDots` and `CarouselAr
   ```text
   container
   - track
-  -- slide
+  -- slide (has data-index="" property, if needed)
   -- slide
   - track
   container

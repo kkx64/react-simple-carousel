@@ -47,13 +47,18 @@ const CarouselDots = ({
     [dots],
   );
 
+  const dotGap = useMemo(
+    () => (trackBounds.width - dotBounds.width * dots) / (dots - 1),
+    [dotBounds.width],
+  );
+
   const translateOffsetLeft = useMemo(
-    () => containerBounds.width / 2 - trackBounds.width / dots / 2,
+    () => containerBounds.width / 2 - dotBounds.width / 2,
     [containerBounds.width, trackBounds.width],
   );
 
   const translateX = useMemo(
-    () => translateOffsetLeft - (trackBounds.width / dots) * activeDot,
+    () => translateOffsetLeft - (dotBounds.width + dotGap) * activeDot,
     [translateOffsetLeft, activeDot, dots],
   );
 
