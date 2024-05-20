@@ -20,6 +20,7 @@
   transform: translateX(-50%);
   max-width: 200px;
   background-color: transparent;
+  backdrop-filter: none;
   z-index: 2;
 
   &__dot {

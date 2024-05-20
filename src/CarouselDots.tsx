@@ -9,6 +9,7 @@ export interface DotRenderFnProps {
   dot: number;
   isActive: boolean;
   ref: (element: HTMLElement | null) => void;
+  onDotClick?: (index: number) => void;
 }
 export interface CarouselDotsProps {
   dots: number;
@@ -21,7 +22,7 @@ export interface CarouselDotsProps {
   fixed?: boolean;
   transitionDuration?: number;
   onDotClick?: (dot: number) => void;
-  dotRender?: ({ dot, isActive }: DotRenderFnProps) => React.ReactNode;
+  dotRender?: (props: DotRenderFnProps) => React.ReactNode;
 }
 
 const CarouselDots = ({
@@ -46,12 +47,14 @@ const CarouselDots = ({
     [dots],
   );
 
+  const translateOffsetLeft = useMemo(
+    () => containerBounds.width / 2 - trackBounds.width / dots / 2,
+    [containerBounds.width, trackBounds.width],
+  );
+
   const translateX = useMemo(
-    () =>
-      containerBounds.width / 2 -
-      trackBounds.width / dots / 2 -
-      (trackBounds.width / dots) * activeDot,
-    [containerBounds.width, activeDot, trackBounds.width, dots],
+    () => translateOffsetLeft - (trackBounds.width / dots) * activeDot,
+    [translateOffsetLeft, activeDot, dots],
   );
 
   const onDotClick = useCallback((dot: number) => {
@@ -65,13 +68,13 @@ const CarouselDots = ({
           ? "fit-content"
           : `min(${dotBounds.width * 3 + 36}px, 80%)`,
       }}
-      className={clsx({ CarouselDots: !wrapperClassName }, wrapperClassName)}
+      className={clsx("CarouselDots", wrapperClassName)}
     >
       <div
         ref={containerRef}
         className={clsx(
+          "CarouselDots__container",
           {
-            CarouselDots__container: !containerClassName,
             "CarouselDots__container--no-gradient":
               gradient === false || fixed === true,
           },
@@ -86,21 +89,22 @@ const CarouselDots = ({
               ? `${transitionDuration}s`
               : undefined,
           }}
-          className={clsx(
-            { CarouselDots__track: !trackClassName },
-            trackClassName,
-          )}
+          className={clsx("CarouselDots__track", trackClassName)}
         >
           {dotsArray.map((dot) =>
             dotRender ? (
-              dotRender({ dot, isActive: dot === activeDot, ref: dotRef })
+              dotRender({
+                dot,
+                isActive: dot === activeDot,
+                ref: dotRef,
+                onDotClick: onDotClick,
+              })
             ) : (
               <div
                 onClick={() => onDotClick?.(dot)}
                 ref={dotRef}
                 key={`dot-${dot}`}
-                className={clsx({
-                  CarouselDots__dot: !dotClassName,
+                className={clsx("CarouselDots__dot", {
                   "CarouselDots__dot--active":
                     dot === activeDot && !dotClassName,
                   ...(dotClassName && {

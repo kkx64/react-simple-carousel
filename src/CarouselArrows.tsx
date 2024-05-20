@@ -21,20 +21,11 @@ const CarouselArrows = ({
   arrowClassName,
 }: CarouselArrowsProps) => {
   return (
-    <div
-      className={clsx({ CarouselArrows: !wrapperClassName }, wrapperClassName)}
-    >
-      <div
-        className={clsx(
-          { CarouselArrows__container: !containerClassName },
-          containerClassName,
-        )}
-      >
+    <div className={clsx("CarouselArrows", wrapperClassName)}>
+      <div className={clsx("CarouselArrows__container", containerClassName)}>
         <button
           onClick={onPrevClick}
-          className={clsx({
-            "CarouselArrows__arrow CarouselArrows__arrow--prev":
-              !arrowClassName,
+          className={clsx("CarouselArrows__arrow CarouselArrows__arrow--prev", {
             ...(arrowClassName && {
               [arrowClassName]: true,
               [`${arrowClassName}--prev`]: true,

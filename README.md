@@ -56,14 +56,14 @@ The library exports three components: `Carousel`, `CarouselDots` and `CarouselAr
   The duration (in seconds) of the slide transition animation.
 
 - **containerClassName**: `string`  
-  **Replacement** CSS class names for the carousel container.
+  **Additional** CSS class names for the carousel container.
 
 - **trackClassName**: `string`  
-  **Replacement** CSS class names for the carousel track.
+  **Additional** CSS class names for the carousel track.
 
 - **slideClassName**: `string`  
-   **Replacement** CSS class names for individual slides.  
-   When you replace this class, you also have access to two extra classes:
+   **Additional** CSS class names for individual slides.  
+   You also have access to two extra classes:
 
   ```css
   .yourClass--active {
@@ -94,7 +94,7 @@ The library exports three components: `Carousel`, `CarouselDots` and `CarouselAr
 - **dotsFixed**: `boolean`  
   Set to `true` to disable dot scrolling and switch to fixed dot layout. Also disables dot fade gradient.
 
-- **dotRender**: `({dot: number, isActive: boolean, ref: (element: HTMLElement) => void }) => ReactNode`
+- **dotRender**: `({dot: number, isActive: boolean, ref: (element: HTMLElement) => void, onDotClick?: (index: number) => void }) => ReactNode`
   Custom dot rendering function, to render special dots without completely removing the scrolling dots feature.
 
 - **customDots**: `((props: { dots: number; activeDot: number; onDotClick?: (index: number) => void; }) => JSX.Element) | null`  
@@ -141,16 +141,16 @@ The library exports three components: `Carousel`, `CarouselDots` and `CarouselAr
   Transition duration for the sliding dots (in seconds). Passed down from `Carousel` if using default dots.
 
 - **containerClassName**: `string`  
-  **Replacement** CSS class names for the container of the dots.
+  **Additional** CSS class names for the container of the dots.
 
 - **wrapperClassName**: `string`  
-  **Replacement** CSS class names for the wrapper of the dots.
+  **Additional** CSS class names for the wrapper of the dots.
 
 - **trackClassName**: `string`  
-  **Replacement** CSS class names for the track of the dots.
+  **Additional** CSS class names for the track of the dots.
 
 - **dotClassName**: `string`  
-  **Replacement** CSS class names for individual dots.
+  **Additional** CSS class names for individual dots.
   Access the active dot with:
 
   ```css
@@ -183,11 +183,11 @@ The library exports three components: `Carousel`, `CarouselDots` and `CarouselAr
   A callback function invoked when the previous arrow is clicked.
 
 - **containerClassName**: `string`  
-  **Replacement** CSS class names for the container of the arrows.
+  **Additional** CSS class names for the container of the arrows.
 
 - **arrowClassName**: `string`  
-   **Replacement** CSS class names for individual arrows.  
-   If you replace this class, you have access to two additional classes:
+   **Additional** CSS class names for individual arrows.  
+   You have access to two additional classes:
 
   ```css
   .yourClass--prev{
@@ -199,7 +199,7 @@ The library exports three components: `Carousel`, `CarouselDots` and `CarouselAr
   ```
 
 - **wrapperClassName**: `string`  
-   **Replacement** CSS class names for the wrapper of the arrows.
+   **Additional** CSS class names for the wrapper of the arrows.
 
   Structure:
 

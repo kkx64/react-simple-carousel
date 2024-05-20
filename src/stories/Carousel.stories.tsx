@@ -1,10 +1,9 @@
-import "./Carousel.stories.scss";
-
 import { Meta, StoryObj } from "@storybook/react";
 import clsx from "classnames";
 
 import Carousel, { CarouselProps, CarouselRef } from "../Carousel";
 import CarouselDots from "../CarouselDots";
+import "./Carousel.stories.scss";
 
 import { useRef, useState } from "react";
 import building from "./assets/building.webp";

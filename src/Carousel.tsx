@@ -78,6 +78,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
 
     const [dragStartX, setDragStartX] = useState(0);
     const [dragging, setDragging] = useState(false);
+    const [disableDrag, setDisableDrag] = useState(false);
 
     /** Maximum offset when dragging */
     const maxDragOffset = useMemo(
@@ -136,8 +137,6 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
 
     const handleDragStart = useCallback(
       (event: React.MouseEvent | React.TouchEvent) => {
-        event.stopPropagation();
-        event.preventDefault();
         const clientX =
           "touches" in event ? event.touches[0].clientX : event.clientX;
         setDragStartX(clientX);
@@ -148,9 +147,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
 
     const handleDragMove = useCallback(
       (event: React.MouseEvent | React.TouchEvent) => {
-        if (!dragging || !trackRef.current) return;
-        event.stopPropagation();
-        event.preventDefault();
+        if (!dragging || !trackRef.current || disableDrag) return;
 
         const clientX =
           "touches" in event ? event.touches[0].clientX : event.clientX;
@@ -171,6 +168,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
         dragging,
         dragStartX,
         translateX,
+        disableDrag,
         trackRef.current,
         containerBounds.width,
       ],
@@ -179,9 +177,6 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
     const handleDragEnd = useCallback(
       (event: React.MouseEvent | React.TouchEvent) => {
         if (!dragging) return;
-
-        event.stopPropagation();
-        event.preventDefault();
 
         const clientX =
           "touches" in event ? event.changedTouches[0].clientX : event.clientX;
@@ -225,12 +220,30 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       ],
     );
 
+    const handleWindowScroll = () => {
+      setDisableDrag(true);
+    };
+
+    const handleWindowScrollEnd = () => {
+      setDisableDrag(false);
+    };
+
+    useEffect(() => {
+      window.addEventListener("scroll", handleWindowScroll);
+      window.addEventListener("scrollend", handleWindowScrollEnd);
+      return () => {
+        window.removeEventListener("scroll", handleWindowScroll);
+        window.removeEventListener("scrollend", handleWindowScrollEnd);
+      };
+    }, []);
+
     const trackStyle = useMemo(() => {
       if (!disableTranslate) {
         return {
           transform: `translateX(${-translateX}px)`,
           transitionDuration: `${dragging ? 0.01 : transitionDuration}s`,
           transitionTimingFunction: dragging ? "linear" : undefined,
+          touchAction: dragging ? "none" : undefined,
         };
       }
       return undefined;
@@ -239,7 +252,10 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
     return (
       <div
         ref={containerRef}
-        className={clsx({ Carousel: !containerClassName }, containerClassName)}
+        className={clsx("Carousel", containerClassName)}
+        style={{
+          touchAction: dragging ? "none" : undefined,
+        }}
       >
         <div
           onTouchStart={handleDragStart}
@@ -247,7 +263,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
           onTouchEnd={handleDragEnd}
           ref={trackRef}
           style={trackStyle}
-          className={clsx({ Carousel__track: !trackClassName }, trackClassName)}
+          className={clsx("Carousel__track", trackClassName)}
         >
           {Children.map(children, (child, i) => (
             <div
@@ -257,11 +273,10 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
                 height: containerBounds.height,
               }}
               className={clsx({
-                ...(!slideClassName && {
-                  Carousel__slide: true,
-                  "Carousel__slide--dragging": dragging,
-                  "Carousel__slide--active": currentSlide === i,
-                }),
+                Carousel__slide: true,
+                "Carousel__slide--dragging": dragging,
+                "Carousel__slide--active": currentSlide === i,
+
                 ...(slideClassName && {
                   [slideClassName]: true,
                   [`${slideClassName}--dragging`]: dragging,
