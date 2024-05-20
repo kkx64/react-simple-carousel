@@ -72,7 +72,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
     ref,
   ) => {
     const trackRef = useRef<HTMLDivElement>(null);
-    const [scrolling, setScrolling] = useState(false);
+    const containerReactRef = useRef<HTMLDivElement | null>(null);
 
     const [containerRef, containerBounds] = useMeasure({ debounce: 100 });
 
@@ -83,6 +83,8 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       y: 0,
     });
     const [dragging, setDragging] = useState(false);
+    const [scrolling, setScrolling] = useState(false);
+    const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
 
     /** Maximum offset when dragging */
     const maxDragOffset = useMemo(
@@ -136,26 +138,32 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       return Math.min(calculatedTranslateX, maxTranslateX);
     }, [currentSlide, containerBounds.width, shownSlides, slides]);
 
-    const handleDragStart = useCallback(
-      (event: React.MouseEvent | React.TouchEvent) => {
-        const clientX =
-          "touches" in event ? event.touches[0].clientX : event.clientX;
-        const clientY =
-          "touches" in event ? event.touches[0].clientY : event.clientY;
-        setDragStart({ x: clientX, y: clientY });
-        setDragging(true);
-      },
-      [],
-    );
+    const handleDragStart = useCallback((event: MouseEvent | TouchEvent) => {
+      const clientX =
+        "touches" in event ? event.touches[0].clientX : event.clientX;
+      const clientY =
+        "touches" in event ? event.touches[0].clientY : event.clientY;
+
+      setDragStart({ x: clientX, y: clientY });
+    }, []);
 
     const handleDragMove = useCallback(
-      (event: React.MouseEvent | React.TouchEvent) => {
-        if (!dragging || !trackRef.current || scrolling) return;
+      (event: MouseEvent | TouchEvent) => {
+        if (!trackRef.current || scrolling) return;
 
         const clientX =
           "touches" in event ? event.touches[0].clientX : event.clientX;
 
         const dragOffsetX = clientX - dragStart.x;
+
+        if (!dragging && Math.abs(dragOffsetX) > 10) {
+          setDragging(true);
+        }
+
+        if (!dragging) return;
+
+        event.preventDefault();
+        event.stopPropagation();
 
         trackRef.current.style.transform = `translateX(${
           -translateX +
@@ -172,15 +180,15 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
         dragging,
         dragStart.x,
         dragStart.y,
-        scrolling,
         translateX,
         trackRef.current,
         containerBounds.width,
+        scrolling,
       ],
     );
 
     const handleDragEnd = useCallback(
-      (event: React.MouseEvent | React.TouchEvent) => {
+      (event: MouseEvent | TouchEvent) => {
         if (!dragging) return;
 
         const clientX =
@@ -236,12 +244,12 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       return undefined;
     }, [translateX, transitionDuration, disableTranslate, dragging]);
 
-    const handlePageScroll = (e: Event) => {
+    const handleScroll = () => {
       setScrolling(true);
-      if (dragging) {
-        e.preventDefault();
-        e.stopPropagation();
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current);
       }
+      scrollTimeout.current = setTimeout(handleScrollEnd, 500);
     };
 
     const handleScrollEnd = () => {
@@ -249,20 +257,41 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
     };
 
     useEffect(() => {
-      window.addEventListener("scroll", handlePageScroll, { passive: false });
-      window.addEventListener("scrollend", handleScrollEnd);
-      return () => {
-        window.removeEventListener("scroll", handlePageScroll);
-        window.removeEventListener("scrollend", handleScrollEnd);
-      };
-    }, [handlePageScroll, handleScrollEnd]);
+      if (containerReactRef.current) {
+        containerReactRef.current.addEventListener(
+          "touchstart",
+          handleDragStart,
+        );
+        containerReactRef.current.addEventListener("touchmove", handleDragMove);
+        containerReactRef.current.addEventListener("touchend", handleDragEnd);
+        window.addEventListener("scroll", handleScroll);
+        return () => {
+          containerReactRef.current?.removeEventListener(
+            "touchstart",
+            handleDragStart,
+          );
+          containerReactRef.current?.removeEventListener(
+            "touchmove",
+            handleDragMove,
+          );
+          containerReactRef.current?.removeEventListener(
+            "touchend",
+            handleDragEnd,
+          );
+          window.removeEventListener("scroll", handleScroll);
+        };
+      }
+    }, [handleDragStart, handleDragMove, handleDragEnd]);
 
     return (
-      <div ref={containerRef} className={clsx("Carousel", containerClassName)}>
+      <div
+        ref={(node) => {
+          containerRef(node);
+          containerReactRef.current = node;
+        }}
+        className={clsx("Carousel", containerClassName)}
+      >
         <div
-          onTouchStart={handleDragStart}
-          onTouchMove={handleDragMove}
-          onTouchEnd={handleDragEnd}
           ref={trackRef}
           style={trackStyle}
           className={clsx("Carousel__track", trackClassName)}
@@ -291,7 +320,6 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
             </div>
           ))}
         </div>
-
         {customDots &&
           customDots({
             dots: slides,
