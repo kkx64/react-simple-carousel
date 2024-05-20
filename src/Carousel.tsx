@@ -29,6 +29,9 @@ export interface CarouselProps extends PropsWithChildren {
   disableTranslate?: boolean;
   dotsGradient?: boolean;
   dotsFixed?: boolean;
+  autoPlay?: boolean;
+  autoPlayInterval?: number;
+  fitHeight?: boolean;
   dotRender?: (props: DotRenderFnProps) => ReactNode;
   customDots?:
     | ((props: {
@@ -64,8 +67,11 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       trackClassName,
       slideClassName,
       disableTranslate,
+      fitHeight = false,
       transitionDuration = 0.3,
       shownSlides = 1,
+      autoPlay = false,
+      autoPlayInterval = 3,
       dotsFixed,
       dotsGradient,
     }: CarouselProps,
@@ -73,6 +79,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
   ) => {
     const trackRef = useRef<HTMLDivElement>(null);
     const containerReactRef = useRef<HTMLDivElement | null>(null);
+    const autoPlayIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
     const [containerRef, containerBounds] = useMeasure({ debounce: 100 });
 
@@ -103,18 +110,21 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
     // Slide change logic
 
     const onDotClick = useCallback((index: number) => {
-      setCurrentSlide(index);
+      handleSetSlide(index);
     }, []);
 
     const onPrevClick = useCallback(() => {
+      resetAutoPlay();
       setCurrentSlide((slide) => (slide - 1 + slides) % slides);
     }, [slides]);
 
     const onNextClick = useCallback(() => {
+      resetAutoPlay();
       setCurrentSlide((slide) => (slide + 1) % slides);
     }, [slides]);
 
     const handleSetSlide = useCallback((index: number) => {
+      resetAutoPlay();
       setCurrentSlide((index + slides) % slides);
     }, []);
 
@@ -143,6 +153,10 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
         "touches" in event ? event.touches[0].clientX : event.clientX;
       const clientY =
         "touches" in event ? event.touches[0].clientY : event.clientY;
+
+      if (autoPlayIntervalRef.current) {
+        clearInterval(autoPlayIntervalRef.current);
+      }
 
       setDragStart({ x: clientX, y: clientY });
     }, []);
@@ -207,6 +221,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
           newSlide = Math.min(slides - shownSlides, currentSlide + 1);
         }
 
+        resetAutoPlay();
         setCurrentSlide(newSlide);
         setDragging(false);
 
@@ -239,6 +254,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
           transform: `translateX(${-translateX}px)`,
           transitionDuration: `${dragging ? 0.01 : transitionDuration}s`,
           transitionTimingFunction: dragging ? "linear" : undefined,
+          height: fitHeight ? "fit-content" : undefined,
         };
       }
       return undefined;
@@ -283,6 +299,29 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       }
     }, [handleDragStart, handleDragMove, handleDragEnd]);
 
+    const resetAutoPlay = () => {
+      if (autoPlayIntervalRef.current) {
+        clearInterval(autoPlayIntervalRef.current);
+      }
+      if (autoPlay) {
+        autoPlayIntervalRef.current = setInterval(
+          () => {
+            onNextClick();
+          },
+          Math.max(autoPlayInterval * 1000, transitionDuration * 1000),
+        );
+      }
+    };
+
+    useEffect(() => {
+      resetAutoPlay();
+      return () => {
+        if (autoPlayIntervalRef.current) {
+          clearInterval(autoPlayIntervalRef.current);
+        }
+      };
+    }, [autoPlay, autoPlayInterval]);
+
     return (
       <div
         ref={(node) => {
@@ -290,6 +329,9 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
           containerReactRef.current = node;
         }}
         className={clsx("Carousel", containerClassName)}
+        style={{
+          height: fitHeight ? "fit-content" : undefined,
+        }}
       >
         <div
           ref={trackRef}
@@ -302,7 +344,6 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
               data-index={i}
               style={{
                 width: containerBounds.width / shownSlides,
-                height: containerBounds.height,
               }}
               className={clsx({
                 Carousel__slide: true,

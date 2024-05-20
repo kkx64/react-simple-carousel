@@ -40,6 +40,21 @@ const meta: Meta<typeof Carousel> = {
       description: "Whether the dots should have a gradient",
       control: { type: "boolean" },
     },
+    autoPlay: {
+      type: "boolean",
+      description: "Whether the carousel should autoplay",
+      control: { type: "boolean" },
+    },
+    autoPlayInterval: {
+      type: "number",
+      description: "Interval between autoplay slides",
+      control: { type: "number" },
+    },
+    fitHeight: {
+      type: "boolean",
+      description: "Whether the carousel should fit the height of the slides",
+      control: { type: "boolean" },
+    },
   },
 };
 

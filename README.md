@@ -94,6 +94,18 @@ The library exports three components: `Carousel`, `CarouselDots` and `CarouselAr
 - **dotsFixed**: `boolean`  
   Set to `true` to disable dot scrolling and switch to fixed dot layout. Also disables dot fade gradient.
 
+- **autoPlay**: `boolean`  
+  Whether to automatically move between slides.  
+  **Default: `false`**
+
+- **autoPlayInterval**: `number`  
+  Time between automatically moving between slides (s).  
+  **Default: `3`**
+
+- **fitHeight**: `boolean`  
+  Have the Carousel fit around the contents instead of fill the parent.  
+  **Default: `false`**
+
 - **dotRender**: `({dot: number, isActive: boolean, ref: (element: HTMLElement) => void, onDotClick?: (index: number) => void }) => ReactNode`
   Custom dot rendering function, to render special dots without completely removing the scrolling dots feature.
 
