@@ -1,4 +1,8 @@
-# Simple React Carousel
+# @kkx64/react-simplecarousel
+
+[![@kkx64/react-simple-carousel's badge](https://deno.bundlejs.com/?q=@kkx64/react-simple-carousel&badge=simple)](https://bundlejs.com/?q=@kkx64/react-simple-carousel)
+[!["Buy Me A Coffee"](https://img.shields.io/badge/-buy_me_a%C2%A0coffee-gray?logo=buy-me-a-coffee)](https://buymeacoffee.com/kirilkrsteski)
+
 
 A simple, lightweight, performant & easy to modify carousel component for React. Built for simplicity and ease of use.  
 Works on desktop with arrows and dragging on mobile.
