@@ -55,6 +55,16 @@ const meta: Meta<typeof Carousel> = {
       description: "Whether the carousel should fit the height of the slides",
       control: { type: "boolean" },
     },
+    centered: {
+      type: "boolean",
+      description: "Whether to center slides in the carousel",
+      control: { type: "boolean" },
+    },
+    noActiveSlide: {
+      type: "boolean",
+      description: "Use as normal carousel without active slide style",
+      control: { type: "boolean" },
+    },
   },
 };
 

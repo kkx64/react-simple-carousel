@@ -31,7 +31,9 @@ export interface CarouselProps extends PropsWithChildren {
   dotsFixed?: boolean;
   autoPlay?: boolean;
   autoPlayInterval?: number;
+  noActiveSlide?: boolean;
   fitHeight?: boolean;
+  centered?: boolean;
   dotRender?: (props: DotRenderFnProps) => ReactNode;
   customDots?:
     | ((props: {
@@ -68,8 +70,10 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       slideClassName,
       disableTranslate,
       fitHeight = false,
+      noActiveSlide = false,
       transitionDuration = 0.3,
-      shownSlides = 1,
+      shownSlides: shownSlidesProp = 1,
+      centered = false,
       autoPlay = false,
       autoPlayInterval = 3,
       dotsFixed,
@@ -80,6 +84,11 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
     const trackRef = useRef<HTMLDivElement>(null);
     const containerReactRef = useRef<HTMLDivElement | null>(null);
     const autoPlayIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    const shownSlides = useMemo(
+      () => Math.max(shownSlidesProp, 1),
+      [shownSlidesProp],
+    );
 
     const [containerRef, { width }] = useMeasure();
     const containerWidth = useMemo(() => width ?? 0, [width]);
@@ -108,7 +117,13 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
     );
 
     /** Total number of slides */
-    const slides = useMemo(() => mappedChildren.length, [mappedChildren]);
+    const slides = useMemo(() => {
+      if (noActiveSlide) {
+        return Math.ceil(mappedChildren.length / shownSlides + 0.1);
+      } else {
+        return mappedChildren.length;
+      }
+    }, [mappedChildren, shownSlides, noActiveSlide]);
 
     const slideWidth = useMemo(
       () => containerWidth / shownSlides,
@@ -149,12 +164,38 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
     // Dragging logic
 
     const translateX = useMemo(() => {
+      if (disableTranslate) return 0;
+      if (shownSlides >= slides && !noActiveSlide) {
+        if (centered) {
+          const emptySpace = containerWidth - slideWidth * slides;
+          return -emptySpace / 2;
+        }
+        return 0;
+      }
       const maxTranslateX =
         (slides - shownSlides) * (containerWidth / shownSlides);
       const calculatedTranslateX =
         currentSlide * (containerWidth / shownSlides);
+
+      if (noActiveSlide) {
+        return calculatedTranslateX;
+      }
+
+      if (centered) {
+        const centerOffset = (containerWidth - slideWidth) / 2;
+        return calculatedTranslateX - centerOffset;
+      }
+
       return Math.min(calculatedTranslateX, maxTranslateX);
-    }, [currentSlide, containerWidth, shownSlides, slides]);
+    }, [
+      currentSlide,
+      containerWidth,
+      shownSlides,
+      slides,
+      slideWidth,
+      centered,
+      noActiveSlide,
+    ]);
 
     const handleDragStart = useCallback((event: MouseEvent | TouchEvent) => {
       const clientX =
@@ -356,12 +397,14 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
                   className={clsx({
                     Carousel__slide: true,
                     "Carousel__slide--dragging": dragging,
-                    "Carousel__slide--active": currentSlide === i,
+                    "Carousel__slide--active":
+                      currentSlide === i && !noActiveSlide,
 
                     ...(slideClassName && {
                       [slideClassName]: true,
                       [`${slideClassName}--dragging`]: dragging,
-                      [`${slideClassName}--active`]: currentSlide === i,
+                      [`${slideClassName}--active`]:
+                        currentSlide === i && !noActiveSlide,
                     }),
                   })}
                 >

@@ -50,7 +50,7 @@ The library exports three components: `Carousel`, `CarouselDots` and `CarouselAr
 ### CarouselProps
 
 - **shownSlides**: `number`  
-  The number of slides to be displayed simultaneously.
+  The number of slides to be displayed simultaneously. You can also put decimal numbers to have the next slides be slightly visible.
 
 - **transitionDuration**: `number`  
   The duration (in seconds) of the slide transition animation.
@@ -93,6 +93,14 @@ The library exports three components: `Carousel`, `CarouselDots` and `CarouselAr
 
 - **dotsFixed**: `boolean`  
   Set to `true` to disable dot scrolling and switch to fixed dot layout. Also disables dot fade gradient.
+
+- **centered**: `boolean`
+  If set to true, will place the active slide in the center of the carousel. Does nothing when `noActiveSlide` is true.
+  **Default: `false`**
+
+- **noActiveSlide**: `boolean`
+  If set to true acts like a normal carousel without "active" slides - has enough pages to just view all slides.
+  **Default: `false`**
 
 - **autoPlay**: `boolean`  
   Whether to automatically move between slides.  

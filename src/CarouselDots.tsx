@@ -54,17 +54,17 @@ const CarouselDots = ({
 
   const dotGap = useMemo(
     () => (trackWidth - dotWidth * dots) / (dots - 1),
-    [dotWidth],
+    [dotWidth, dots, trackWidth],
   );
 
   const translateOffsetLeft = useMemo(
     () => containerWidth / 2 - dotWidth / 2,
-    [containerWidth, trackWidth],
+    [containerWidth, dotWidth],
   );
 
   const translateX = useMemo(
     () => translateOffsetLeft - (dotWidth + dotGap) * activeDot,
-    [translateOffsetLeft, activeDot, dots],
+    [translateOffsetLeft, activeDot, dotWidth, dotGap],
   );
 
   const onDotClick = useCallback((dot: number) => {
