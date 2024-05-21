@@ -1,6 +1,6 @@
 {
   "name": "@kkx64/react-simple-carousel",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Simple carousel component for React",
   "author": "Kiril Krsteski",
   "homepage": "https://github.com/kkx64/react-simple-carousel",
@@ -41,8 +41,7 @@
     "build-storybook": "npm run build && storybook build"
   },
   "dependencies": {
-    "classnames": "^2.5.1",
-    "react-use-measure": "^2.1.1"
+    "classnames": "^2.5.1"
   },
   "peerDependencies": {
     "react": "^18.2.0",

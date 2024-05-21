@@ -3,7 +3,7 @@ import "./CarouselDots.scss";
 import { memo, useCallback, useMemo } from "react";
 
 import clsx from "classnames";
-import useMeasure from "react-use-measure";
+import useMeasure from "./hooks/useMeasure";
 
 export interface DotRenderFnProps {
   dot: number;
@@ -38,9 +38,14 @@ const CarouselDots = ({
   onDotClick: onDotClickProp,
   dotRender,
 }: CarouselDotsProps) => {
-  const [containerRef, containerBounds] = useMeasure({ debounce: 100 });
-  const [trackRef, trackBounds] = useMeasure({ debounce: 100 });
-  const [dotRef, dotBounds] = useMeasure({ debounce: 100 });
+  const [containerRef, containerBounds] = useMeasure();
+  const containerWidth = containerBounds.width ?? 0;
+
+  const [trackRef, trackBounds] = useMeasure();
+  const trackWidth = trackBounds.width ?? 0;
+
+  const [dotRef, dotBounds] = useMeasure();
+  const dotWidth = dotBounds.width ?? 0;
 
   const dotsArray = useMemo(
     () => Array.from({ length: dots }, (_, index) => index),
@@ -48,17 +53,17 @@ const CarouselDots = ({
   );
 
   const dotGap = useMemo(
-    () => (trackBounds.width - dotBounds.width * dots) / (dots - 1),
-    [dotBounds.width],
+    () => (trackWidth - dotWidth * dots) / (dots - 1),
+    [dotWidth],
   );
 
   const translateOffsetLeft = useMemo(
-    () => containerBounds.width / 2 - dotBounds.width / 2,
-    [containerBounds.width, trackBounds.width],
+    () => containerWidth / 2 - dotWidth / 2,
+    [containerWidth, trackWidth],
   );
 
   const translateX = useMemo(
-    () => translateOffsetLeft - (dotBounds.width + dotGap) * activeDot,
+    () => translateOffsetLeft - (dotWidth + dotGap) * activeDot,
     [translateOffsetLeft, activeDot, dots],
   );
 
@@ -69,9 +74,7 @@ const CarouselDots = ({
   return (
     <div
       style={{
-        width: fixed
-          ? "fit-content"
-          : `min(${dotBounds.width * 3 + 36}px, 80%)`,
+        width: fixed ? "fit-content" : `min(${dotWidth * 3 + 36}px, 80%)`,
       }}
       className={clsx("CarouselDots", wrapperClassName)}
     >

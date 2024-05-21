@@ -14,7 +14,7 @@ import {
 } from "react";
 
 import clsx from "classnames";
-import useMeasure from "react-use-measure";
+import useMeasure from "./hooks/useMeasure";
 
 import CarouselArrows from "./CarouselArrows";
 import CarouselDots, { DotRenderFnProps } from "./CarouselDots";
@@ -81,7 +81,8 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
     const containerReactRef = useRef<HTMLDivElement | null>(null);
     const autoPlayIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    const [containerRef, containerBounds] = useMeasure({ debounce: 100 });
+    const [containerRef, { width }] = useMeasure();
+    const containerWidth = useMemo(() => width ?? 0, [width]);
 
     const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -94,18 +95,25 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
     const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
 
     /** Maximum offset when dragging */
-    const maxDragOffset = useMemo(
-      () => containerBounds.width,
-      [containerBounds.width],
-    );
+    const maxDragOffset = useMemo(() => containerWidth, [containerWidth]);
     /** Maximum offset when dragging out of bounds on last or first slide */
     const maxDragOffsetEnd = useMemo(
-      () => containerBounds.width / 5,
-      [containerBounds.width],
+      () => containerWidth / 5,
+      [containerWidth],
+    );
+
+    const mappedChildren = useMemo(
+      () => Children.toArray(children).filter(Boolean),
+      [children],
     );
 
     /** Total number of slides */
-    const slides = useMemo(() => Children.count(children), [children]);
+    const slides = useMemo(() => mappedChildren.length, [mappedChildren]);
+
+    const slideWidth = useMemo(
+      () => containerWidth / shownSlides,
+      [containerWidth, shownSlides],
+    );
 
     // Slide change logic
 
@@ -142,11 +150,11 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
 
     const translateX = useMemo(() => {
       const maxTranslateX =
-        (slides - shownSlides) * (containerBounds.width / shownSlides);
+        (slides - shownSlides) * (containerWidth / shownSlides);
       const calculatedTranslateX =
-        currentSlide * (containerBounds.width / shownSlides);
+        currentSlide * (containerWidth / shownSlides);
       return Math.min(calculatedTranslateX, maxTranslateX);
-    }, [currentSlide, containerBounds.width, shownSlides, slides]);
+    }, [currentSlide, containerWidth, shownSlides, slides]);
 
     const handleDragStart = useCallback((event: MouseEvent | TouchEvent) => {
       const clientX =
@@ -196,7 +204,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
         dragStart.y,
         translateX,
         trackRef.current,
-        containerBounds.width,
+        containerWidth,
         scrolling,
       ],
     );
@@ -211,13 +219,13 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
 
         // Maximum allowable translation in pixels
         const maxTranslateX =
-          (containerBounds.width * (slides - shownSlides)) / shownSlides;
+          (containerWidth * (slides - shownSlides)) / shownSlides;
 
         // Determine the new slide index based on drag offset
         let newSlide = currentSlide;
-        if (dragOffset > containerBounds.width / 2) {
+        if (dragOffset > containerWidth / 2) {
           newSlide = Math.max(0, currentSlide - 1);
-        } else if (dragOffset < -containerBounds.width / 2) {
+        } else if (dragOffset < -containerWidth / 2) {
           newSlide = Math.min(slides - shownSlides, currentSlide + 1);
         }
 
@@ -229,10 +237,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
         if (trackRef.current) {
           const newTranslateX = Math.max(
             0,
-            Math.min(
-              maxTranslateX,
-              (newSlide * containerBounds.width) / shownSlides,
-            ),
+            Math.min(maxTranslateX, (newSlide * containerWidth) / shownSlides),
           );
           trackRef.current.style.transform = `translateX(-${newTranslateX}px)`;
         }
@@ -240,7 +245,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       [
         dragging,
         dragStart.x,
-        containerBounds.width,
+        containerWidth,
         slides,
         shownSlides,
         currentSlide,
@@ -265,7 +270,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       if (scrollTimeout.current) {
         clearTimeout(scrollTimeout.current);
       }
-      scrollTimeout.current = setTimeout(handleScrollEnd, 500);
+      scrollTimeout.current = setTimeout(handleScrollEnd, 300);
     };
 
     const handleScrollEnd = () => {
@@ -325,8 +330,8 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
     return (
       <div
         ref={(node) => {
-          containerRef(node);
           containerReactRef.current = node;
+          containerRef(node);
         }}
         className={clsx("Carousel", containerClassName)}
         style={{
@@ -338,28 +343,32 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
           style={trackStyle}
           className={clsx("Carousel__track", trackClassName)}
         >
-          {Children.map(children, (child, i) => (
-            <div
-              key={`slide-${i}`}
-              data-index={i}
-              style={{
-                width: containerBounds.width / shownSlides,
-              }}
-              className={clsx({
-                Carousel__slide: true,
-                "Carousel__slide--dragging": dragging,
-                "Carousel__slide--active": currentSlide === i,
+          {Children.toArray(children)
+            .filter(Boolean)
+            .map((child, i) => {
+              return (
+                <div
+                  key={`slide-${i}`}
+                  data-index={i}
+                  style={{
+                    width: slideWidth,
+                  }}
+                  className={clsx({
+                    Carousel__slide: true,
+                    "Carousel__slide--dragging": dragging,
+                    "Carousel__slide--active": currentSlide === i,
 
-                ...(slideClassName && {
-                  [slideClassName]: true,
-                  [`${slideClassName}--dragging`]: dragging,
-                  [`${slideClassName}--active`]: currentSlide === i,
-                }),
-              })}
-            >
-              {child}
-            </div>
-          ))}
+                    ...(slideClassName && {
+                      [slideClassName]: true,
+                      [`${slideClassName}--dragging`]: dragging,
+                      [`${slideClassName}--active`]: currentSlide === i,
+                    }),
+                  })}
+                >
+                  {child}
+                </div>
+              );
+            })}
         </div>
         {customDots &&
           customDots({
