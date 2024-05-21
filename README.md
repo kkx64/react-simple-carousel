@@ -1,13 +1,13 @@
-# @kkx64/react-simplecarousel
+# @kkx64/react-simple-carousel
 
 [![@kkx64/react-simple-carousel's badge](https://deno.bundlejs.com/?q=@kkx64/react-simple-carousel&badge=simple)](https://bundlejs.com/?q=@kkx64/react-simple-carousel)
 [!["Buy Me A Coffee"](https://img.shields.io/badge/-buy_me_a%C2%A0coffee-gray?logo=buy-me-a-coffee)](https://buymeacoffee.com/kirilkrsteski)
 
-
-A simple, lightweight, performant & easy to modify carousel component for React. Built for simplicity and ease of use.  
+A simple, super-lightweight, performant & easy to modify carousel component for React. Built for simplicity and ease of use, **~7kB gzipped!**.  
 Works on desktop with arrows and dragging on mobile.
 
 See the [Storybook](https://kkx64.github.io/react-simple-carousel/?path=/story/carousel--basic-carousel) for demos.
+Examples can be found in the [CodeSandbox](https://codesandbox.io/p/sandbox/kkx64-react-simple-carousel-examples-z6ccm7).
 
 ## Installation
 
