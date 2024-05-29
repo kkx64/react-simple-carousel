@@ -98,6 +98,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
     const [dragStart, setDragStart] = useState({
       x: 0,
       y: 0,
+      timestamp: 0,
     });
     const [dragging, setDragging] = useState(false);
     const [scrolling, setScrolling] = useState(false);
@@ -207,7 +208,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
         clearInterval(autoPlayIntervalRef.current);
       }
 
-      setDragStart({ x: clientX, y: clientY });
+      setDragStart({ x: clientX, y: clientY, timestamp: Date.now() });
     }, []);
 
     const handleDragMove = useCallback(
@@ -264,9 +265,15 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
 
         // Determine the new slide index based on drag offset
         let newSlide = currentSlide;
-        if (dragOffset > containerWidth / 2) {
+        if (
+          dragOffset > containerWidth / 2 ||
+          (Date.now() - dragStart.timestamp < 200 && dragOffset > 20)
+        ) {
           newSlide = Math.max(0, currentSlide - 1);
-        } else if (dragOffset < -containerWidth / 2) {
+        } else if (
+          dragOffset < -containerWidth / 2 ||
+          (Date.now() - dragStart.timestamp < 200 && dragOffset < -20)
+        ) {
           newSlide = Math.min(slides - shownSlides, currentSlide + 1);
         }
 
@@ -298,7 +305,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       if (!disableTranslate) {
         return {
           transform: `translateX(${-translateX}px)`,
-          transitionDuration: `${dragging ? 0.01 : transitionDuration}s`,
+          transitionDuration: `${dragging ? 0.005 : transitionDuration}s`,
           transitionTimingFunction: dragging ? "linear" : undefined,
           height: fitHeight ? "fit-content" : undefined,
         };
