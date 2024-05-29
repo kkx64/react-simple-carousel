@@ -1,0 +1,5 @@
+{
+  "name": "@kkx64/react-simple-carousel",
+  "version": "1.5.2",
+  "exports": "./src/index.ts"
+}
