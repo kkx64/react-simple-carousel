@@ -50,6 +50,11 @@ const meta: Meta<typeof Carousel> = {
       description: "Interval between autoplay slides",
       control: { type: "number" },
     },
+    pauseOnHover: {
+      type: "boolean",
+      description: "Pause auto play on hover",
+      control: { type: "boolean" },
+    },
     fitHeight: {
       type: "boolean",
       description: "Whether the carousel should fit the height of the slides",

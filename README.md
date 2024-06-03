@@ -114,6 +114,10 @@ The library exports three components: `Carousel`, `CarouselDots` and `CarouselAr
   Time between automatically moving between slides (s).  
   **Default: `3`**
 
+- **pauseOnHover**: `boolean`  
+  Pause `autoPlay` while hovering.  
+  **Default: `false`**
+
 - **fitHeight**: `boolean`  
   Have the Carousel fit around the contents instead of fill the parent.  
   **Default: `false`**

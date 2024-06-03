@@ -31,6 +31,7 @@ export interface CarouselProps extends PropsWithChildren {
   dotsFixed?: boolean;
   autoPlay?: boolean;
   autoPlayInterval?: number;
+  pauseOnHover?: boolean;
   noActiveSlide?: boolean;
   fitHeight?: boolean;
   centered?: boolean;
@@ -78,6 +79,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       autoPlayInterval = 3,
       dotsFixed,
       dotsGradient,
+      pauseOnHover,
     }: CarouselProps,
     ref,
   ) => {
@@ -351,6 +353,42 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
         };
       }
     }, [handleDragStart, handleDragMove, handleDragEnd]);
+
+    const handleMouseEnter = () => {
+      if (autoPlay && autoPlayIntervalRef.current && pauseOnHover) {
+        clearInterval(autoPlayIntervalRef.current);
+      }
+    };
+
+    const handleMouseLeave = () => {
+      if (autoPlay && pauseOnHover) {
+        resetAutoPlay();
+      }
+    };
+
+    useEffect(() => {
+      if (containerReactRef.current) {
+        containerReactRef.current.addEventListener(
+          "mouseenter",
+          handleMouseEnter,
+        );
+        containerReactRef.current.addEventListener(
+          "mouseleave",
+          handleMouseLeave,
+        );
+
+        return () => {
+          containerReactRef.current?.removeEventListener(
+            "mouseenter",
+            handleMouseEnter,
+          );
+          containerReactRef.current?.removeEventListener(
+            "mouseleave",
+            handleMouseLeave,
+          );
+        };
+      }
+    }, [containerReactRef, autoPlay, pauseOnHover]);
 
     const resetAutoPlay = () => {
       if (autoPlayIntervalRef.current) {
