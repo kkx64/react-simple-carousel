@@ -67,9 +67,12 @@ const CarouselDots = ({
     [translateOffsetLeft, activeDot, dotWidth, dotGap],
   );
 
-  const onDotClick = useCallback((dot: number) => {
-    onDotClickProp?.(dot);
-  }, []);
+  const onDotClick = useCallback(
+    (dot: number) => {
+      onDotClickProp?.(dot);
+    },
+    [onDotClickProp],
+  );
 
   return (
     <div

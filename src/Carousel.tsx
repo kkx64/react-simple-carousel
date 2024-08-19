@@ -149,10 +149,13 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       setCurrentSlide((slide) => (slide + 1) % slides);
     }, [slides]);
 
-    const handleSetSlide = useCallback((index: number) => {
-      resetAutoPlay();
-      setCurrentSlide((index + slides) % slides);
-    }, []);
+    const handleSetSlide = useCallback(
+      (index: number) => {
+        resetAutoPlay();
+        setCurrentSlide((index + slides) % slides);
+      },
+      [slides],
+    );
 
     useImperativeHandle(ref, () => ({
       nextSlide: onNextClick,
