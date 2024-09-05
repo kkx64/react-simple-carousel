@@ -1,45 +1,62 @@
-import { MutableRefObject, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const useMeasure = () => {
-  const observer = useRef<ResizeObserver | null>(null);
-  const measureRef: MutableRefObject<HTMLElement | null> =
-    useRef<HTMLElement | null>(null);
+  const [observer, setObserver] = useState<ResizeObserver | null>(null);
+  const measureRef = useRef<HTMLElement | null>(null);
 
-  const setRef = (element: HTMLElement | null) => {
-    measureRef.current = element;
-  };
+  const [dimensions, setDimensions] = useState<{
+    width: number | null;
+    height: number | null;
+  }>({
+    width: null,
+    height: null,
+  });
 
-  const [width, setWidth] = useState<number | null>(null);
-  const [height, setHeight] = useState<number | null>(null);
+  const onResize = useCallback((entries: ResizeObserverEntry[]) => {
+    const entry = entries[0];
+    if (entry) {
+      const { width, height } = entry.contentRect;
+      setDimensions({ width, height });
+    }
+  }, []);
 
-  const onResize = ([entry]: ResizeObserverEntry[]) => {
-    if (!entry) return;
-    if (entry.contentRect.width !== width) setWidth(entry.contentRect.width);
-    if (entry.contentRect.height !== height)
-      setHeight(entry.contentRect.height);
-  };
+  const setRef = useCallback(
+    (element: HTMLElement | null) => {
+      if (measureRef.current) {
+        observer?.unobserve(measureRef.current);
+      }
+
+      measureRef.current = element;
+
+      if (element) {
+        observer?.observe(element);
+      }
+    },
+    [observer],
+  );
 
   useEffect(() => {
-    if (observer && observer.current && measureRef.current) {
-      observer.current.unobserve(measureRef.current);
-    }
-    observer.current = new ResizeObserver(onResize);
-    observe();
+    const newObserver = new ResizeObserver(onResize);
+    setObserver(newObserver);
 
     return () => {
-      if (observer.current && measureRef.current) {
-        observer.current.unobserve(measureRef.current);
+      newObserver.disconnect();
+    };
+  }, [onResize]);
+
+  useEffect(() => {
+    if (measureRef.current && observer) {
+      observer.observe(measureRef.current);
+    }
+
+    return () => {
+      if (measureRef.current) {
+        observer?.unobserve(measureRef.current);
       }
     };
-  }, [measureRef.current]);
+  }, [observer]);
 
-  const observe = () => {
-    if (measureRef.current && observer.current) {
-      observer.current.observe(measureRef.current);
-    }
-  };
-
-  return [setRef, { width, height }] as const;
+  return [setRef, dimensions] as const;
 };
 
 export default useMeasure;

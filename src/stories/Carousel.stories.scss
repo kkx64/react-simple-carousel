@@ -157,3 +157,42 @@
     overflow: hidden;
   }
 }
+
+.TabbedCarousels {
+  display: flex;
+  flex-direction: column;
+
+  &__tabButtons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  &__tabButton {
+    padding: 8px;
+    outline: none;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+
+    &--active {
+      font-weight: bold;
+      border-bottom: 2px solid black;
+    }
+  }
+
+  &__tabContent {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__tab {
+    display: none;
+    height: 400px;
+
+    &--active {
+      display: block;
+    }
+  }
+}

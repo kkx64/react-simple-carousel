@@ -335,3 +335,76 @@ export const StylizedCarousel: Story = {
     ),
   ],
 };
+
+const TabbedCarousels = (props: CarouselProps) => {
+  const [tab, setTab] = useState(0);
+  return (
+    <>
+      <div className="TabbedCarousels">
+        <div className="TabbedCarousels__tabButtons">
+          <button
+            className={clsx("TabbedCarousels__tabButton", {
+              "TabbedCarousels__tabButton--active": tab === 0,
+            })}
+            onClick={() => setTab(0)}
+          >
+            First Tab
+          </button>
+          <button
+            className={clsx("TabbedCarousels__tabButton", {
+              "TabbedCarousels__tabButton--active": tab === 1,
+            })}
+            onClick={() => setTab(1)}
+          >
+            Second Tab
+          </button>
+        </div>
+        <div className="TabbedCarousels__tabContent">
+          <div
+            className={clsx("TabbedCarousels__tab", {
+              "TabbedCarousels__tab--active": tab === 0,
+            })}
+          >
+            <Carousel {...props}>
+              <div className="CarouselStory__slide">
+                <img src={building} />
+              </div>
+              <div className="CarouselStory__slide">
+                <img src={flower} />
+              </div>
+            </Carousel>
+          </div>
+          <div
+            className={clsx("TabbedCarousels__tab", {
+              "TabbedCarousels__tab--active": tab === 1,
+            })}
+          >
+            <Carousel {...props}>
+              <div className="CarouselStory__slide">
+                <img src={coffee} />
+              </div>
+              <div className="CarouselStory__slide">
+                <img src={coffee2} />
+              </div>
+            </Carousel>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export const CarouselTabs: Story = {
+  args: {
+    shownSlides: 3,
+    transitionDuration: 0.5,
+  },
+  render: (props) => <TabbedCarousels {...props} />,
+  decorators: [
+    (Story) => (
+      <div style={{ width: "100%", height: 400 }} className="StylizedCarousel">
+        <Story />
+      </div>
+    ),
+  ],
+};
