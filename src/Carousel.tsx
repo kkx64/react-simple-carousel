@@ -35,6 +35,7 @@ export interface CarouselProps extends PropsWithChildren {
   noActiveSlide?: boolean;
   fitHeight?: boolean;
   centered?: boolean;
+  transition?: "slide" | "fade";
   dotRender?: (props: DotRenderFnProps) => ReactNode;
   customDots?:
     | ((props: {
@@ -80,6 +81,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       dotsFixed,
       dotsGradient,
       pauseOnHover,
+      transition = "slide",
     }: CarouselProps,
     ref,
   ) => {
@@ -234,6 +236,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
         event.preventDefault();
         event.stopPropagation();
 
+        if (transition === "fade") return;
         trackRef.current.style.transform = `translateX(${
           -translateX +
           clamp(
@@ -253,6 +256,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
         trackRef.current,
         containerWidth,
         scrolling,
+        transition,
       ],
     );
 
@@ -287,7 +291,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
         setDragging(false);
 
         // Snap the track back to the nearest slide
-        if (trackRef.current) {
+        if (trackRef.current && transition === "slide") {
           const newTranslateX = Math.max(
             0,
             Math.min(maxTranslateX, (newSlide * containerWidth) / shownSlides),
@@ -303,6 +307,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
         shownSlides,
         currentSlide,
         trackRef.current,
+        transition,
       ],
     );
 
@@ -427,30 +432,30 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
           height: fitHeight ? "fit-content" : undefined,
         }}
       >
-        <div
-          ref={trackRef}
-          style={trackStyle}
-          className={clsx("Carousel__track", trackClassName)}
-        >
-          {Children.toArray(children)
-            .filter(Boolean)
-            .map((child, i) => {
-              return (
+        {transition === "fade" && (
+          <div
+            ref={trackRef}
+            className={clsx("Carousel__fadeTrack", trackClassName)}
+          >
+            {Children.toArray(children)
+              .filter(Boolean)
+              .map((child, i) => (
                 <div
                   key={`slide-${i}`}
                   data-index={i}
                   style={{
-                    width: slideWidth,
+                    opacity: currentSlide === i ? 1 : 0,
+                    transition: `opacity ${transitionDuration}s ease-in-out`,
+                    position: currentSlide === i ? "relative" : "absolute",
+                    width: "100%",
+                    pointerEvents: currentSlide === i ? "auto" : "none",
                   }}
                   className={clsx({
                     Carousel__slide: true,
-                    "Carousel__slide--dragging": dragging,
                     "Carousel__slide--active":
                       currentSlide === i && !noActiveSlide,
-
                     ...(slideClassName && {
                       [slideClassName]: true,
-                      [`${slideClassName}--dragging`]: dragging,
                       [`${slideClassName}--active`]:
                         currentSlide === i && !noActiveSlide,
                     }),
@@ -458,9 +463,46 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
                 >
                   {child}
                 </div>
-              );
-            })}
-        </div>
+              ))}
+          </div>
+        )}
+
+        {transition === "slide" && (
+          <div
+            ref={trackRef}
+            style={trackStyle}
+            className={clsx("Carousel__track", trackClassName)}
+          >
+            {Children.toArray(children)
+              .filter(Boolean)
+              .map((child, i) => {
+                return (
+                  <div
+                    key={`slide-${i}`}
+                    data-index={i}
+                    style={{
+                      width: slideWidth,
+                    }}
+                    className={clsx({
+                      Carousel__slide: true,
+                      "Carousel__slide--dragging": dragging,
+                      "Carousel__slide--active":
+                        currentSlide === i && !noActiveSlide,
+
+                      ...(slideClassName && {
+                        [slideClassName]: true,
+                        [`${slideClassName}--dragging`]: dragging,
+                        [`${slideClassName}--active`]:
+                          currentSlide === i && !noActiveSlide,
+                      }),
+                    })}
+                  >
+                    {child}
+                  </div>
+                );
+              })}
+          </div>
+        )}
         {customDots &&
           customDots({
             dots: slides,

@@ -3,6 +3,7 @@ import clsx from "classnames";
 
 import Carousel, { CarouselProps, CarouselRef } from "../Carousel";
 import CarouselDots from "../CarouselDots";
+import CarouselArrows from "../CarouselArrows";
 import "./Carousel.stories.scss";
 
 import { useRef, useState } from "react";
@@ -69,6 +70,14 @@ const meta: Meta<typeof Carousel> = {
       type: "boolean",
       description: "Use as normal carousel without active slide style",
       control: { type: "boolean" },
+    },
+    transition: {
+      type: "string",
+      description: "Transition type",
+      options: ["slide", "fade"],
+      control: {
+        type: "radio",
+      },
     },
   },
 };
@@ -403,6 +412,47 @@ export const CarouselTabs: Story = {
   decorators: [
     (Story) => (
       <div style={{ width: "100%", height: 400 }} className="StylizedCarousel">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
+export const CustomArrows: Story = {
+  args: {
+    children: [
+      <div className="CarouselStory__slide">
+        <img src={building} />
+      </div>,
+      <div className="CarouselStory__slide">
+        <img src={flower} />
+      </div>,
+      <div className="CarouselStory__slide">
+        <img src={coffee} />
+      </div>,
+      <div className="CarouselStory__slide">
+        <img src={coffee2} />
+      </div>,
+    ],
+    customArrows: (props) => (
+      <CarouselArrows
+        {...props}
+        arrowRender={({ direction }) => (
+          <div
+            style={{
+              fontWeight: "bold",
+              color: "white",
+            }}
+          >
+            {direction === "prev" ? "PREV" : "NEXT"}
+          </div>
+        )}
+      />
+    ),
+  },
+  decorators: [
+    (Story) => (
+      <div style={{ width: "100%", height: 400 }}>
         <Story />
       </div>
     ),

@@ -26,29 +26,36 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 3rem;
-    height: 3rem;
 
-    background-color: rgba(0, 0, 0, 0.3);
-    border-radius: 50%;
     cursor: pointer;
-    transition-property: background-color, transform;
-    transition-duration: 0.1s;
-    transition-timing-function: ease-in-out;
-    will-change: background-color, transform;
-    backdrop-filter: blur(16px);
     border: none;
-
     pointer-events: all;
+    background-color: transparent;
 
-    svg {
-      fill: white;
-      width: 1.5rem;
-      height: 1.5rem;
-    }
+    width: fit-content;
+    height: fit-content;
 
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.4);
+    &.CarouselArrows__styledArrow {
+      background-color: rgba(0, 0, 0, 0.3);
+      border-radius: 50%;
+      transition-property: background-color, transform;
+      transition-duration: 0.1s;
+      transition-timing-function: ease-in-out;
+      will-change: background-color, transform;
+      backdrop-filter: blur(16px);
+
+      svg {
+        fill: white;
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+
+      width: 3rem;
+      height: 3rem;
     }
 
     &--prev {

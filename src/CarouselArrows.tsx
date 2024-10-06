@@ -8,6 +8,7 @@ import ArrowIcon from "./icons/ArrowIcon";
 export interface CarouselArrowsProps {
   onNextClick: () => void;
   onPrevClick: () => void;
+  arrowRender?: (props: { direction: "prev" | "next" }) => JSX.Element;
   containerClassName?: string;
   arrowClassName?: string;
   wrapperClassName?: string;
@@ -19,33 +20,36 @@ const CarouselArrows = ({
   wrapperClassName,
   containerClassName,
   arrowClassName,
+  arrowRender,
 }: CarouselArrowsProps) => {
   return (
     <div className={clsx("CarouselArrows", wrapperClassName)}>
       <div className={clsx("CarouselArrows__container", containerClassName)}>
         <button
           onClick={onPrevClick}
-          className={clsx("CarouselArrows__arrow CarouselArrows__arrow--prev", {
+          className={clsx("CarouselArrows__arrow", {
+            "CarouselArrows__arrow--prev CarouselArrows__styledArrow":
+              !arrowRender,
             ...(arrowClassName && {
               [arrowClassName]: true,
               [`${arrowClassName}--prev`]: true,
             }),
           })}
         >
-          <ArrowIcon />
+          {arrowRender?.({ direction: "prev" }) || <ArrowIcon />}
         </button>
         <button
           onClick={onNextClick}
-          className={clsx({
-            "CarouselArrows__arrow CarouselArrows__arrow--next":
-              !arrowClassName,
+          className={clsx("CarouselArrows__arrow", {
+            "CarouselArrows__arrow--next CarouselArrows__styledArrow":
+              !arrowRender,
             ...(arrowClassName && {
               [arrowClassName]: true,
               [`${arrowClassName}--next`]: true,
             }),
           })}
         >
-          <ArrowIcon />
+          {arrowRender?.({ direction: "next" }) || <ArrowIcon />}
         </button>
       </div>
     </div>
