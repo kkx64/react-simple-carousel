@@ -11,6 +11,13 @@ export default defineConfig({
     libInjectCss(),
     dts({ rollupTypes: true, exclude: ["src/stories/**/*"] }),
   ],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: "modern-compiler",
+      },
+    },
+  },
   build: {
     sourcemap: false,
     minify: true,

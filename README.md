@@ -59,6 +59,13 @@ The library exports three components: `Carousel`, `CarouselDots` and `CarouselAr
 - **transitionDuration**: `number`  
   The duration (in seconds) of the slide transition animation.
 
+- **transition**: `'slide' | 'fade'`  
+  The type of transition to apply to the slides. Currently `'slide' | 'fade'`.
+
+- **keyboardNavigation**: `boolean`  
+  Whether to use arrow keys to navigate between slides.  
+  **Default: `true`**
+
 - **containerClassName**: `string`  
   **Additional** CSS class names for the carousel container.
 

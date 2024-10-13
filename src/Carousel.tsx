@@ -36,6 +36,7 @@ export interface CarouselProps extends PropsWithChildren {
   fitHeight?: boolean;
   centered?: boolean;
   transition?: "slide" | "fade";
+  keyboardNavigation?: boolean;
   dotRender?: (props: DotRenderFnProps) => ReactNode;
   customDots?:
     | ((props: {
@@ -82,6 +83,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       dotsGradient,
       pauseOnHover,
       transition = "slide",
+      keyboardNavigation = true,
     }: CarouselProps,
     ref,
   ) => {
@@ -135,7 +137,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       [containerWidth, shownSlides],
     );
 
-    // Slide change logic
+    // ! ############################### Slide change logic
 
     const onDotClick = useCallback((index: number) => {
       handleSetSlide(index);
@@ -165,11 +167,7 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       setSlide: handleSetSlide,
     }));
 
-    useEffect(() => {
-      onSlideChange?.(currentSlide);
-    }, [currentSlide]);
-
-    // Dragging logic
+    // ! ############################### Dragging logic
 
     const translateX = useMemo(() => {
       if (disableTranslate) return 0;
@@ -315,13 +313,15 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       if (!disableTranslate) {
         return {
           transform: `translateX(${-translateX}px)`,
-          transitionDuration: `${dragging ? 0.005 : transitionDuration}s`,
+          transitionDuration: `${dragging ? 0.05 : transitionDuration}s`,
           transitionTimingFunction: dragging ? "linear" : undefined,
           height: fitHeight ? "fit-content" : undefined,
         };
       }
       return undefined;
     }, [translateX, transitionDuration, disableTranslate, dragging]);
+
+    // ! ############################### Misc event handlers
 
     const handleScroll = () => {
       setScrolling(true);
@@ -334,6 +334,48 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
     const handleScrollEnd = () => {
       setScrolling(false);
     };
+
+    const handleKeyPress = useCallback(
+      (event: KeyboardEvent) => {
+        if (keyboardNavigation) {
+          if (event.key === "ArrowRight") {
+            onNextClick();
+          }
+          if (event.key === "ArrowLeft") {
+            onPrevClick();
+          }
+        }
+      },
+      [keyboardNavigation],
+    );
+
+    const resetAutoPlay = () => {
+      if (autoPlayIntervalRef.current) {
+        clearInterval(autoPlayIntervalRef.current);
+      }
+      if (autoPlay) {
+        autoPlayIntervalRef.current = setInterval(
+          () => {
+            onNextClick();
+          },
+          Math.max(autoPlayInterval * 1000, transitionDuration * 1000),
+        );
+      }
+    };
+
+    const handleMouseEnter = () => {
+      if (autoPlay && autoPlayIntervalRef.current && pauseOnHover) {
+        clearInterval(autoPlayIntervalRef.current);
+      }
+    };
+
+    const handleMouseLeave = () => {
+      if (autoPlay && pauseOnHover) {
+        resetAutoPlay();
+      }
+    };
+
+    // ! ############################### Effects
 
     useEffect(() => {
       if (containerReactRef.current) {
@@ -362,18 +404,6 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       }
     }, [handleDragStart, handleDragMove, handleDragEnd]);
 
-    const handleMouseEnter = () => {
-      if (autoPlay && autoPlayIntervalRef.current && pauseOnHover) {
-        clearInterval(autoPlayIntervalRef.current);
-      }
-    };
-
-    const handleMouseLeave = () => {
-      if (autoPlay && pauseOnHover) {
-        resetAutoPlay();
-      }
-    };
-
     useEffect(() => {
       if (containerReactRef.current) {
         containerReactRef.current.addEventListener(
@@ -398,20 +428,6 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
       }
     }, [containerReactRef, autoPlay, pauseOnHover]);
 
-    const resetAutoPlay = () => {
-      if (autoPlayIntervalRef.current) {
-        clearInterval(autoPlayIntervalRef.current);
-      }
-      if (autoPlay) {
-        autoPlayIntervalRef.current = setInterval(
-          () => {
-            onNextClick();
-          },
-          Math.max(autoPlayInterval * 1000, transitionDuration * 1000),
-        );
-      }
-    };
-
     useEffect(() => {
       resetAutoPlay();
       return () => {
@@ -420,6 +436,17 @@ const Carousel = forwardRef<CarouselRef, CarouselProps>(
         }
       };
     }, [autoPlay, autoPlayInterval]);
+
+    useEffect(() => {
+      onSlideChange?.(currentSlide);
+    }, [currentSlide]);
+
+    useEffect(() => {
+      window.addEventListener("keydown", handleKeyPress);
+      return () => {
+        window.removeEventListener("keydown", handleKeyPress);
+      };
+    }, [handleKeyPress]);
 
     return (
       <div
